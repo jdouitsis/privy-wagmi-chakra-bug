@@ -2,7 +2,7 @@
 
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {http} from 'viem';
-import {mainnet, sepolia} from 'viem/chains';
+import {baseSepolia, base} from 'viem/chains';
 
 import type {PrivyClientConfig} from '@privy-io/react-auth';
 import {PrivyProvider} from '@privy-io/react-auth';
@@ -10,11 +10,13 @@ import {WagmiProvider, createConfig} from '@privy-io/wagmi';
 
 const queryClient = new QueryClient();
 
+let count = 0;
+
 export const wagmiConfig = createConfig({
-  chains: [mainnet, sepolia],
+  chains: [base, baseSepolia],
   transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
+    [base.id]: http('https://mainnet.base.org'),
+    [baseSepolia.id]: http('https://sepolia.base.org'),
   },
 });
 
@@ -24,13 +26,14 @@ const privyConfig: PrivyClientConfig = {
     requireUserPasswordOnCreate: true,
     noPromptOnSignature: false,
   },
-  loginMethods: ['wallet', 'email', 'sms'],
+  loginMethods: ['wallet', 'email', 'google', 'telegram'],
   appearance: {
     showWalletLoginFirst: true,
   },
 };
 
 export default function Providers({children}: {children: React.ReactNode}) {
+  console.log('Rendering Providers count: ', count++);
   return (
     <PrivyProvider
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
