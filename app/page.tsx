@@ -12,6 +12,7 @@ import EnsAvatar from 'components/EnsAvatar';
 import EnsName from 'components/EnsName';
 import EnsResolver from 'components/EnsResolver';
 import FeeData from 'components/FeeData';
+import {Wallet} from 'components/MenuSelector';
 import PublicClient from 'components/PublicClient';
 import SendTransaction from 'components/SendTransaction';
 import SignMessage from 'components/SignMessage';
@@ -23,13 +24,12 @@ import Transaction from 'components/Transaction';
 import WaitForTransaction from 'components/WaitForTransaction';
 import WalletClient from 'components/WalletClient';
 import WatchPendingTransactions from 'components/WatchPendingTransactions';
+import {useWeb3Ready} from 'james/useWeb3Ready';
 import {shorten} from 'lib/utils';
 import Image from 'next/image';
-import {useCallback, useEffect, useMemo} from 'react';
 import {useAccount, useDisconnect} from 'wagmi';
 
 import {useLinkAccount, usePrivy, useWallets} from '@privy-io/react-auth';
-import type {ConnectedWallet} from '@privy-io/react-auth';
 import {useSetActiveWallet} from '@privy-io/wagmi';
 
 import wagmiPrivyLogo from '../public/wagmi_privy_logo.png';
@@ -43,6 +43,7 @@ export default function Home() {
   const {ready, user, authenticated, login, connectWallet, logout} = usePrivy();
   const {wallets, ready: walletsReady} = useWallets();
   const {linkWallet} = useLinkAccount();
+  const {isReady} = useWeb3Ready();
   useLinkAccount();
   useLinkAccount();
   useLinkAccount();
@@ -53,7 +54,6 @@ export default function Home() {
   const {disconnect} = useDisconnect();
   const {setActiveWallet} = useSetActiveWallet();
 
-  useNetworkEnforcement();
   if (!ready) {
     return null;
   }
@@ -105,6 +105,8 @@ export default function Home() {
                 </div>
               </>
             )}
+
+            <Wallet.Selector />
 
             {walletsReady &&
               wallets.map((wallet) => {
@@ -212,89 +214,4 @@ const Break = () => {
       })}
     </div>
   );
-};
-
-const ALLOWED_CHAIN_IDS = [84532];
-const TARGET_CHAIN_ID = 84532;
-
-export const useNetworkEnforcement = () => {
-  const {address, isConnected, chainId} = useAccount();
-  const {wallets} = useWallets();
-  const {authenticated, ready} = usePrivy();
-  const activeWallet = useMemo(() => getActiveWallet(wallets, address), [wallets, address]);
-
-  const isOnCorrectNetwork = useMemo(() => {
-    if (!activeWallet?.chainId) return false;
-
-    const chainIdNumber = parseChainId(activeWallet.chainId);
-    return isChainAllowed(chainIdNumber);
-  }, [activeWallet?.chainId]);
-
-  const canEnforceNetwork = useCallback(() => {
-    return (
-      ready &&
-      authenticated &&
-      isConnected &&
-      address &&
-      chainId &&
-      !isOnCorrectNetwork &&
-      wallets.length > 0 &&
-      activeWallet
-    );
-  }, [
-    ready,
-    authenticated,
-    isConnected,
-    address,
-    chainId,
-    isOnCorrectNetwork,
-    wallets.length,
-    activeWallet,
-  ]);
-
-  const switchToCorrectNetwork = useCallback(async () => {
-    if (!activeWallet) return;
-
-    await activeWallet.switchChain(TARGET_CHAIN_ID);
-  }, [activeWallet]);
-
-  useEffect(() => {
-    if (!canEnforceNetwork()) {
-      return;
-    }
-
-    const activeWalletChainId = parseChainId(activeWallet!.chainId);
-    const isActiveWalletOnWrongNetwork = !isChainAllowed(activeWalletChainId);
-
-    if (isActiveWalletOnWrongNetwork) {
-      switchToCorrectNetwork();
-    }
-  }, [
-    chainId,
-    ready,
-    authenticated,
-    isConnected,
-    address,
-    isOnCorrectNetwork,
-    switchToCorrectNetwork,
-    activeWallet,
-    canEnforceNetwork,
-  ]);
-
-  return {
-    isOnCorrectNetwork,
-  };
-};
-
-const getActiveWallet = (
-  wallets: ConnectedWallet[],
-  address: `0x${string}` | undefined,
-): ConnectedWallet | undefined => wallets.find((wallet) => wallet.address === address);
-
-const parseChainId = (chainId: string): number => {
-  return parseInt(chainId.split(':')[1], 10);
-};
-
-const isChainAllowed = (chainId: number): boolean => {
-  return ALLOWED_CHAIN_IDS.includes(chainId);
 };
