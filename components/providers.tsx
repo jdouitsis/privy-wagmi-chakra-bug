@@ -25,7 +25,6 @@ const privyConfig: PrivyClientConfig = {
   embeddedWallets: {
     createOnLogin: 'users-without-wallets',
     requireUserPasswordOnCreate: true,
-    noPromptOnSignature: false,
   },
   loginMethods: ['wallet', 'email', 'google', 'telegram'],
   appearance: {
