@@ -45,7 +45,7 @@ export default function Providers({children}: {children: React.ReactNode}) {
     >
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
-          <ChakraProvider>{children}</ChakraProvider>
+          {children}
         </WagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>
