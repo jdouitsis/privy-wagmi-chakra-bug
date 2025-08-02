@@ -25,34 +25,24 @@ const shortAddress = (address?: string) => {
   return `${address.substring(0, 6)}...${address.substring(address.length - 4, address.length)}`;
 };
 
-const UserIconChakra = chakra(UserIcon);
-
 const Page: React.FC = () => {
-  console.log('New dummy page!');
+  const {linkWallet} = useLinkAccount();
 
   return (
     <VStack w="full" maxW="md" mx="auto" my={10}>
       <Selector />
 
       <Divider />
-      <Actions />
+      <HStack>
+        <Button
+          onClick={() => {
+            setTimeout(linkWallet, 0);
+          }}
+        >
+          Link Wallet
+        </Button>
+      </HStack>
     </VStack>
-  );
-};
-
-const Actions = () => {
-  const {linkWallet} = useLinkAccount();
-
-  return (
-    <HStack>
-      <Button
-        onClick={() => {
-          setTimeout(linkWallet, 0);
-        }}
-      >
-        Link Wallet
-      </Button>
-    </HStack>
   );
 };
 
