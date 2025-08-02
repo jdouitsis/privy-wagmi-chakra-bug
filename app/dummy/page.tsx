@@ -32,11 +32,6 @@ const Page: React.FC = () => {
 
   return (
     <VStack w="full" maxW="md" mx="auto" my={10}>
-      <DisplayUseAccount />
-
-      <Divider />
-      <DisplayUseWallets />
-
       <Selector />
 
       <Divider />
@@ -62,90 +57,6 @@ const Actions = () => {
 };
 
 export default Page;
-
-const DisplayUseWallets = () => {
-  const wallets = useWallets();
-  const account = useAccount();
-
-  return (
-    <VStack w="md">
-      <HStack justifyContent="space-between" w="full">
-        <Text>useWallets.wallets</Text>
-        <VStack alignItems="flex-start">
-          {wallets.wallets.map((wallet) => (
-            <HStack key={wallet.address}>
-              <Image
-                src={
-                  wallet.meta.icon
-                    ? wallet.meta.icon
-                    : wallet.meta.id === 'io.privy.wallet'
-                    ? '/images/privy.png'
-                    : ''
-                }
-                alt={wallet.meta.name}
-                w={4}
-                h={4}
-              />
-              <Text minW="120px">{shortAddress(wallet.address)}</Text>
-              <LinkIcon color={wallet.linked ? 'green.500' : 'red.500'} />
-              <UserIconChakra
-                color={wallet.address === account.address ? 'green.500' : 'red.500'}
-              />
-            </HStack>
-          ))}
-
-          {wallets.wallets.map(
-            (wallet) =>
-              wallet.linked === true && (
-                <HStack
-                  _hover={{bg: 'g.primary.oxford.600'}}
-                  gap="2"
-                  p="2"
-                  alignItems="center"
-                  key={wallet.address}
-                >
-                  <Text>{shortAddress(wallet.address)}</Text>
-                </HStack>
-              ),
-          )}
-        </VStack>
-      </HStack>
-    </VStack>
-  );
-};
-
-const DisplayUseAccount = () => {
-  const account = useAccount();
-  console.log('account', account);
-
-  return (
-    <VStack w="md">
-      {/* useAccount.isConnecting */}
-      <HStack justifyContent="space-between" w="full">
-        <Text>useAccount.isConnecting</Text>
-        <Text>{account.isConnecting ? '✅' : '❌'}</Text>
-      </HStack>
-
-      {/* useAccount.isDisconnecting */}
-      <HStack justifyContent="space-between" w="full">
-        <Text>useAccount.isDisconnected</Text>
-        <Text>{account.isDisconnected ? '✅' : '❌'}</Text>
-      </HStack>
-
-      {/* useAccount.isConnected */}
-      <HStack justifyContent="space-between" w="full">
-        <Text>useAccount.isConnected</Text>
-        <Text>{account.isConnected ? '✅' : '❌'}</Text>
-      </HStack>
-
-      {/* useAccount.address */}
-      <HStack justifyContent="space-between" w="full">
-        <Text>useAccount.address</Text>
-        <Text>{account.address ? shortAddress(account.address) : '❌'}</Text>
-      </HStack>
-    </VStack>
-  );
-};
 
 const Selector = () => {
   const selectedWallet = useAccount();
