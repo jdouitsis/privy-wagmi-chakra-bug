@@ -10,6 +10,12 @@ import {
   Text,
   VStack,
   Divider,
+  Popover,
+  PopoverTrigger,
+  Box,
+  PopoverContent,
+  PopoverArrow,
+  PopoverBody,
 } from '@chakra-ui/react';
 
 import {usePrivy, useWallets} from '@privy-io/react-auth';
@@ -20,30 +26,67 @@ const shortAddress = (address?: string) => {
 };
 
 const Page: React.FC = () => {
-  const {linkWallet} = usePrivy();
-
-  const {wallets} = useWallets();
+  const {linkWallet, login, authenticated} = usePrivy();
 
   return (
     <VStack>
-      <Menu>
-        <MenuButton as={Button}>This menu causes the issue, look at the code</MenuButton>
-        {/* If you comment out this MenuList, then connecting to coinbase works perfectly fine */}
-        <MenuList>
-          {wallets.map((wallet) => (
-            <MenuItem key={wallet.address}>
-              <Text>{shortAddress(wallet.address)}</Text>
-            </MenuItem>
-          ))}
-        </MenuList>
-      </Menu>
+      <Text>{authenticated ? 'Authenticated' : 'Not authenticated'}</Text>
+      {!authenticated && <Button onClick={login}>Login</Button>}
+      <Divider />
 
+      {/* <MenuExample />
+      <Divider /> */}
+
+      <PopoverExample />
       <Divider />
 
       <HStack>
         <Button onClick={linkWallet}>Link Wallet</Button>
       </HStack>
     </VStack>
+  );
+};
+
+const MenuExample = () => {
+  const {wallets} = useWallets();
+
+  return (
+    <Menu>
+      <MenuButton as={Button}>This menu causes the issue, look at the code</MenuButton>
+      <MenuList>
+        {wallets.map((wallet) => (
+          <MenuItem key={wallet.address}>
+            <Text>{shortAddress(wallet.address)}</Text>
+          </MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
+  );
+};
+
+const PopoverExample = () => {
+  return (
+    <Popover placement="top" trigger="hover">
+      <PopoverTrigger>
+        <Box>
+          <Button isDisabled>Open Popover</Button>
+        </Box>
+      </PopoverTrigger>
+      <PopoverContent
+        w="230px"
+        maxH="60vh"
+        maxW="100vh"
+        overflowY="auto"
+        borderColor="g.neutral.metallic.mid"
+        bgColor="g.primary.oxford.500"
+        rounded="sm"
+      >
+        <PopoverArrow bg="gray.800" />
+        <PopoverBody>
+          <Text textAlign="center">Popover content</Text>
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
   );
 };
 
