@@ -150,7 +150,6 @@ const DisplayUseAccount = () => {
 const Selector = () => {
   const selectedWallet = useAccount();
   const {wallets} = useWallets();
-  const {linkWallet} = usePrivy();
 
   return (
     <Menu direction="rtl" placement="bottom-end">
@@ -187,7 +186,6 @@ const Selector = () => {
           p="2"
           gap="2"
           alignItems="center"
-          onClick={() => linkWallet()}
         >
           <PlusIcon fill="blue" />
           Add Wallet
