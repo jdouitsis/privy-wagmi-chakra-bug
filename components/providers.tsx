@@ -1,6 +1,5 @@
 'use client';
 
-import {ChakraProvider} from '@chakra-ui/react';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {http} from 'viem';
 import {baseSepolia, base} from 'viem/chains';

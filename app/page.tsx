@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import {useAccount} from 'wagmi';
 
-import {useLinkAccount, useWallets} from '@privy-io/react-auth';
+import {usePrivy, useWallets} from '@privy-io/react-auth';
 
 const shortAddress = (address?: string) => {
   if (!address) return '';
@@ -21,7 +21,7 @@ const shortAddress = (address?: string) => {
 };
 
 const Page: React.FC = () => {
-  const {linkWallet} = useLinkAccount();
+  const {linkWallet} = usePrivy();
 
   const selectedWallet = useAccount();
   const {wallets} = useWallets();
@@ -31,14 +31,11 @@ const Page: React.FC = () => {
       <Menu>
         <MenuButton>{selectedWallet ? 'Selected' : 'None selected'}</MenuButton>
         <MenuList>
-          {wallets.map(
-            (wallet) =>
-              wallet.linked === true && (
-                <MenuItem key={wallet.address}>
-                  <Text>{shortAddress(wallet.address)}</Text>
-                </MenuItem>
-              ),
-          )}
+          {wallets.map((wallet) => (
+            <MenuItem key={wallet.address}>
+              <Text>{shortAddress(wallet.address)}</Text>
+            </MenuItem>
+          ))}
         </MenuList>
       </Menu>
 
