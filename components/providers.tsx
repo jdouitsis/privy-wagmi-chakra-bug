@@ -1,5 +1,6 @@
 'use client';
 
+import {ChakraProvider} from '@chakra-ui/react';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {http} from 'viem';
 import {baseSepolia, base} from 'viem/chains';
@@ -44,7 +45,7 @@ export default function Providers({children}: {children: React.ReactNode}) {
     >
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
-          {children}
+          <ChakraProvider>{children}</ChakraProvider>
         </WagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>

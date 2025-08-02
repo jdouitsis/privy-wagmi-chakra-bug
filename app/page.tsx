@@ -38,6 +38,7 @@ const Page: React.FC = () => {
       </Menu>
 
       <Divider />
+
       <HStack>
         <Button onClick={linkWallet}>Link Wallet</Button>
       </HStack>
