@@ -11,7 +11,6 @@ import {
   VStack,
   Divider,
 } from '@chakra-ui/react';
-import {useAccount} from 'wagmi';
 
 import {usePrivy, useWallets} from '@privy-io/react-auth';
 
@@ -23,13 +22,12 @@ const shortAddress = (address?: string) => {
 const Page: React.FC = () => {
   const {linkWallet} = usePrivy();
 
-  const selectedWallet = useAccount();
   const {wallets} = useWallets();
 
   return (
     <VStack>
       <Menu>
-        <MenuButton>{selectedWallet ? 'Selected' : 'None selected'}</MenuButton>
+        <MenuButton as={Button}>Open Menu</MenuButton>
         <MenuList>
           {wallets.map((wallet) => (
             <MenuItem key={wallet.address}>
