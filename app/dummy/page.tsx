@@ -6,7 +6,6 @@ import {
   Avatar,
   Button,
   chakra,
-  Flex,
   HStack,
   Image,
   Menu,
@@ -16,14 +15,10 @@ import {
   VStack,
   Divider,
 } from '@chakra-ui/react';
-import {PlusIcon, UserIcon, Wallet2Icon} from 'lucide-react';
-import type {UseAccountReturnType} from 'wagmi';
+import {PlusIcon, UserIcon} from 'lucide-react';
 import {useAccount} from 'wagmi';
 
-import type {ConnectedWallet} from '@privy-io/react-auth';
 import {useLinkAccount, usePrivy, useWallets} from '@privy-io/react-auth';
-
-type WalletTypes = ConnectedWallet | UseAccountReturnType;
 
 const shortAddress = (address?: string) => {
   if (!address) return '';
@@ -159,7 +154,7 @@ const Selector = () => {
 
   return (
     <Menu direction="rtl" placement="bottom-end">
-      <MenuButton>{selectedWallet ? <DisplaySelected /> : <DisplayNoneSelected />}</MenuButton>
+      <MenuButton>{selectedWallet ? 'Selected' : 'None selected'}</MenuButton>
       <MenuList
         px="2"
         minW="min-content"
@@ -199,44 +194,5 @@ const Selector = () => {
         </MenuItem>
       </MenuList>
     </Menu>
-  );
-};
-
-const DisplayNoneSelected = () => {
-  const isDesktop = false;
-
-  return (
-    <Flex gap="2" p="2">
-      <Wallet2Icon />
-      {isDesktop && <Text>Select Wallet</Text>}
-    </Flex>
-  );
-};
-
-/**
- * Takes in a wallet address and an optional icon URL, and displays them in a simple format.
- */
-const Display = (props: {address: string; icon?: string}) => {
-  const {address, icon} = props;
-  const isDesktop = false;
-  return (
-    <Flex gap="2" p="2">
-      <Avatar size="xs" src={icon} />
-      {isDesktop && <Text>{shortAddress(address)}</Text>}
-    </Flex>
-  );
-};
-
-/**
- * A simple wallet display component that shows the selected wallet's icon and a label.
- */
-const DisplaySelected = () => {
-  const isDesktop = false;
-  const selectedWallet = useAccount();
-
-  return (
-    <Flex gap="2" p="2">
-      {isDesktop && <Text>{shortAddress(selectedWallet.address)}</Text>}
-    </Flex>
   );
 };
