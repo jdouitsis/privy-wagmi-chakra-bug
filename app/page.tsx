@@ -28,6 +28,7 @@ const Page: React.FC = () => {
     <VStack>
       <Menu>
         <MenuButton as={Button}>Open Menu</MenuButton>
+        {/* If you comment out this MenuList, then connecting to coinbase works perfectly fine */}
         <MenuList>
           {wallets.map((wallet) => (
             <MenuItem key={wallet.address}>
