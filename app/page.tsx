@@ -27,7 +27,7 @@ const Page: React.FC = () => {
   return (
     <VStack>
       <Menu>
-        <MenuButton as={Button}>Open Menu</MenuButton>
+        <MenuButton as={Button}>This menu causes the issue, look at the code</MenuButton>
         {/* If you comment out this MenuList, then connecting to coinbase works perfectly fine */}
         <MenuList>
           {wallets.map((wallet) => (
