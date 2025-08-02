@@ -25,34 +25,42 @@ import WalletClient from 'components/WalletClient';
 import WatchPendingTransactions from 'components/WatchPendingTransactions';
 import {shorten} from 'lib/utils';
 import Image from 'next/image';
+import {useCallback, useEffect, useMemo} from 'react';
 import {useAccount, useDisconnect} from 'wagmi';
 
-import {usePrivy, useWallets} from '@privy-io/react-auth';
+import {useLinkAccount, usePrivy, useWallets} from '@privy-io/react-auth';
+import type {ConnectedWallet} from '@privy-io/react-auth';
 import {useSetActiveWallet} from '@privy-io/wagmi';
 
 import wagmiPrivyLogo from '../public/wagmi_privy_logo.png';
 
 const MonoLabel = ({label}: {label: string}) => {
-  return <span className="rounded-xl bg-slate-200 px-2 py-1 font-mono">{label}</span>;
+  return <span className="px-2 py-1 font-mono rounded-xl bg-slate-200">{label}</span>;
 };
 
 export default function Home() {
   // Privy hooks
-  const {ready, user, authenticated, login, connectWallet, logout, linkWallet} = usePrivy();
+  const {ready, user, authenticated, login, connectWallet, logout} = usePrivy();
   const {wallets, ready: walletsReady} = useWallets();
+  const {linkWallet} = useLinkAccount();
+  useLinkAccount();
+  useLinkAccount();
+  useLinkAccount();
+  useWallets();
 
   // WAGMI hooks
   const {address, isConnected, isConnecting, isDisconnected} = useAccount();
   const {disconnect} = useDisconnect();
   const {setActiveWallet} = useSetActiveWallet();
 
+  useNetworkEnforcement();
   if (!ready) {
     return null;
   }
 
   return (
     <>
-      <main className="min-h-screen bg-slate-200 p-4 text-slate-800">
+      <main className="p-4 min-h-screen bg-slate-200 text-slate-800">
         <Image
           className="mx-auto rounded-lg"
           src={wagmiPrivyLogo}
@@ -81,13 +89,16 @@ export default function Home() {
           </a>{' '}
           for this app.
         </p>
+
+        <Break />
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="border-1 flex flex-col items-start gap-2 rounded border border-black bg-slate-100 p-3">
+          <div className="flex flex-col gap-2 items-start p-3 rounded border border-black border-1 bg-slate-100">
             <h1 className="text-4xl font-bold">Privy</h1>
             {ready && !authenticated && (
               <>
                 <p>You are not authenticated with Privy</p>
-                <div className="flex items-center gap-4">
+                <div className="flex gap-4 items-center">
                   <Button onClick_={login} cta="Login with Privy" />
                   <span>or</span>
                   <Button onClick_={connectWallet} cta="Connect only" />
@@ -100,7 +111,7 @@ export default function Home() {
                 return (
                   <div
                     key={wallet.address}
-                    className="flex min-w-full flex-row flex-wrap items-center justify-between gap-2 bg-slate-50 p-4"
+                    className="flex flex-row flex-wrap gap-2 justify-between items-center p-4 min-w-full bg-slate-50"
                   >
                     <div>
                       <MonoLabel label={shorten(wallet.address)} />
@@ -122,14 +133,14 @@ export default function Home() {
                 <Button onClick_={linkWallet} cta="Link another wallet" />
                 <textarea
                   value={JSON.stringify(wallets, null, 2)}
-                  className="mt-2 w-full rounded-md bg-slate-700 p-4 font-mono text-xs text-slate-50 sm:text-sm"
+                  className="p-4 mt-2 w-full font-mono text-xs rounded-md bg-slate-700 text-slate-50 sm:text-sm"
                   rows={JSON.stringify(wallets, null, 2).split('\n').length}
                   disabled
                 />
                 <br />
                 <textarea
                   value={JSON.stringify(user, null, 2)}
-                  className="mt-2 w-full rounded-md bg-slate-700 p-4 font-mono text-xs text-slate-50 sm:text-sm"
+                  className="p-4 mt-2 w-full font-mono text-xs rounded-md bg-slate-700 text-slate-50 sm:text-sm"
                   rows={JSON.stringify(user, null, 2).split('\n').length}
                   disabled
                 />
@@ -138,7 +149,7 @@ export default function Home() {
               </>
             )}
           </div>
-          <div className="border-1 flex flex-col items-start gap-2 rounded border border-black bg-slate-100 p-3">
+          <div className="flex flex-col gap-2 items-start p-3 rounded border border-black border-1 bg-slate-100">
             <h1 className="text-4xl font-bold">WAGMI</h1>
             <p>
               Connection status: {isConnecting && <span>🟡 connecting...</span>}
@@ -185,3 +196,105 @@ export default function Home() {
     </>
   );
 }
+
+const Break = () => {
+  const {wallets} = useWallets();
+
+  return (
+    <div>
+      <h1>Break</h1>
+      {wallets.map((wallet) => {
+        return (
+          <div key={wallet.address}>
+            <p>{wallet.address}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const ALLOWED_CHAIN_IDS = [84532];
+const TARGET_CHAIN_ID = 84532;
+
+export const useNetworkEnforcement = () => {
+  const {address, isConnected, chainId} = useAccount();
+  const {wallets} = useWallets();
+  const {authenticated, ready} = usePrivy();
+  const activeWallet = useMemo(() => getActiveWallet(wallets, address), [wallets, address]);
+
+  const isOnCorrectNetwork = useMemo(() => {
+    if (!activeWallet?.chainId) return false;
+
+    const chainIdNumber = parseChainId(activeWallet.chainId);
+    return isChainAllowed(chainIdNumber);
+  }, [activeWallet?.chainId]);
+
+  const canEnforceNetwork = useCallback(() => {
+    return (
+      ready &&
+      authenticated &&
+      isConnected &&
+      address &&
+      chainId &&
+      !isOnCorrectNetwork &&
+      wallets.length > 0 &&
+      activeWallet
+    );
+  }, [
+    ready,
+    authenticated,
+    isConnected,
+    address,
+    chainId,
+    isOnCorrectNetwork,
+    wallets.length,
+    activeWallet,
+  ]);
+
+  const switchToCorrectNetwork = useCallback(async () => {
+    if (!activeWallet) return;
+
+    await activeWallet.switchChain(TARGET_CHAIN_ID);
+  }, [activeWallet]);
+
+  useEffect(() => {
+    if (!canEnforceNetwork()) {
+      return;
+    }
+
+    const activeWalletChainId = parseChainId(activeWallet!.chainId);
+    const isActiveWalletOnWrongNetwork = !isChainAllowed(activeWalletChainId);
+
+    if (isActiveWalletOnWrongNetwork) {
+      switchToCorrectNetwork();
+    }
+  }, [
+    chainId,
+    ready,
+    authenticated,
+    isConnected,
+    address,
+    isOnCorrectNetwork,
+    switchToCorrectNetwork,
+    activeWallet,
+    canEnforceNetwork,
+  ]);
+
+  return {
+    isOnCorrectNetwork,
+  };
+};
+
+const getActiveWallet = (
+  wallets: ConnectedWallet[],
+  address: `0x${string}` | undefined,
+): ConnectedWallet | undefined => wallets.find((wallet) => wallet.address === address);
+
+const parseChainId = (chainId: string): number => {
+  return parseInt(chainId.split(':')[1], 10);
+};
+
+const isChainAllowed = (chainId: number): boolean => {
+  return ALLOWED_CHAIN_IDS.includes(chainId);
+};
