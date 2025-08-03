@@ -16,7 +16,9 @@ import {
   PopoverContent,
   PopoverArrow,
   PopoverBody,
+  Input,
 } from '@chakra-ui/react';
+import {useState} from 'react';
 
 import {usePrivy, useWallets} from '@privy-io/react-auth';
 
@@ -27,18 +29,32 @@ const shortAddress = (address?: string) => {
 
 const Page: React.FC = () => {
   const {linkWallet, login, authenticated} = usePrivy();
+  const [inputValue, setInputValue] = useState('');
+
+  if (!authenticated) {
+    return (
+      <VStack>
+        <Text>Not authenticated</Text>
+        <Button onClick={login}>Login</Button>
+      </VStack>
+    );
+  }
 
   return (
     <VStack>
       <Text>{authenticated ? 'Authenticated' : 'Not authenticated'}</Text>
-      {!authenticated && <Button onClick={login}>Login</Button>}
       <Divider />
 
-      {/* <MenuExample />
+      <MenuExample />
+      <Divider />
+      <Input
+        placeholder="Input"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+      />
+
+      {/* <PopoverExample />
       <Divider /> */}
-
-      <PopoverExample />
-      <Divider />
 
       <HStack>
         <Button onClick={linkWallet}>Link Wallet</Button>
