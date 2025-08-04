@@ -1,24 +1,25 @@
-# Privy x Wagmi Demo
+# Privy x Wagmi x Coinbase Bug Demo
 
-This is a demo NextJS app that uses both [`wagmi`](https://wagmi.sh/) and [Privy](https://www.privy.io/), connecting them with the [`@privy-io/wagmi`](https://www.npmjs.com/package/@privy-io/wagmi) package. 
+## Summary
 
-To try the demo, go to https://wagmi-app.vercel.app/ and login with Privy. As part of login, you'll either connect an external wallet (e.g. MetaMask) or create an embedded wallet associated with your login method. Once connected, click the buttons in the right sidebar to invoke various [`wagmi`](https://wagmi.sh/) hooks, like `useSignMessage`, to interface with your connected wallet. 
+This is a minimalist repo demonstrating a bug when logging into coinbase when the Chakra-ui library is in use.
 
-**Check out our [`wagmi` integration guide](https://docs.privy.io/guide/guides/wagmi) for more guidance!**
+## Steps To Reproduce
 
-## Setup
+1. Clone the repo
 
-1. Fork this repository, clone it, and open it in your terminal.
 ```sh
-git clone https://github.com/<your-github-handle>/wagmi-demo
+git clone git@github.com:jdouitsis/privy-wagmi-chakra-bug.git
 ```
 
 2. Install the necessary dependencies with `npm`.
+
 ```sh
-npm i 
+npm i
 ```
 
-3. Initialize your environment variables by copying the `.env.example` file to an `.env.local` file. Then, in `.env.local`, paste your **Privy App ID** from the [Privy console](https://console.privy.io) and an [**Alchemy API Key**](https://www.alchemy.com/). 
+3. Initialize your environment variables
+
 ```sh
 # In your terminal, create .env.local from .env.local.example
 cp .env.local.example .env.local
@@ -28,11 +29,22 @@ NEXT_PUBLIC_PRIVY_APP_ID=<your-privy-app-id>
 NEXT_PUBLIC_ALCHEMY_API_KEY=<your-alchemy-api-key>
 ```
 
-## Building locally
+4. Build locally
 
-In your project directory, run `npm run dev`. You can now visit http://localhost:4000 to see your app and login with Privy!
+```sh
+npm run dev
+```
 
-## Check out:
-- `app/page.tsx` for how to connect external wallets and create embedded wallets using Privy
-- `components/providers.tsx` for how to wrap your app with the `PrivyProvider`, `WagmiProvider`, and `QueryClientProvider`
-- `components/*.tsx` for examples of calling `wagmi` hooks. The components are named after hook they call; for example, `components/SignMessage.tsx` calls the `useSignMessage` hook. 
+5. Run the app with one of the two problem components to see.
+
+In the [app/page.tsx](./app/page.tsx), there are two components that cause this issue.
+
+1. `MenuExampleThatCausesTheIssueWithCoinbaseWhenRendered`
+2. `PopoverExampleThatCausesTheIssueWithCoinbaseWhenRendered`
+
+If either of these are rendered, linking coinbase via the app will fail due to it getting stuck in an infinite loading state. In each of the components, there is a
+comment showing what part should can be modified to prevent the issue from happening.
+
+## Current Assumption
+
+The current assumption is some underlying implementation of chakra-ui, such as framer-motion or popperjs is somehow interfering with the way privy connects with coinbase.

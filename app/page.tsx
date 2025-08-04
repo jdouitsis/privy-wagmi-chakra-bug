@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  usePopoverContext,
   MenuItem,
   Button,
   HStack,
@@ -28,24 +29,23 @@ const shortAddress = (address?: string) => {
 };
 
 const Page: React.FC = () => {
-  const {linkWallet, login, authenticated} = usePrivy();
+  const {linkWallet, login, logout, authenticated} = usePrivy();
   const [inputValue, setInputValue] = useState('');
 
-  if (!authenticated) {
-    return (
-      <VStack>
-        <Text>Not authenticated</Text>
-        <Button onClick={login}>Login</Button>
-      </VStack>
-    );
-  }
-
   return (
-    <VStack>
+    <VStack bg={authenticated ? 'green' : 'red'}>
+      {!authenticated && (
+        <VStack>
+          <Text>Not authenticated</Text>
+          <Button onClick={login}>Login</Button>
+        </VStack>
+      )}
+
       <Text>{authenticated ? 'Authenticated' : 'Not authenticated'}</Text>
+      <Button onClick={logout}>Logout</Button>
       <Divider />
 
-      <MenuExample />
+      <MenuExampleThatCausesTheIssueWithCoinbaseWhenRendered />
       <Divider />
       <Input
         placeholder="Input"
@@ -53,8 +53,8 @@ const Page: React.FC = () => {
         onChange={(e) => setInputValue(e.target.value)}
       />
 
-      {/* <PopoverExample />
-      <Divider /> */}
+      <PopoverExampleThatCausesTheIssueWithCoinbaseWhenRendered />
+      <Divider />
 
       <HStack>
         <Button onClick={linkWallet}>Link Wallet</Button>
@@ -63,7 +63,7 @@ const Page: React.FC = () => {
   );
 };
 
-const MenuExample = () => {
+const MenuExampleThatCausesTheIssueWithCoinbaseWhenRendered = () => {
   const {wallets} = useWallets();
 
   return (
@@ -71,6 +71,7 @@ const MenuExample = () => {
       <MenuButton as={Button}>This menu causes the issue, look at the code</MenuButton>
       <MenuList>
         {wallets.map((wallet) => (
+          // If the MenuItem is replaced with HStack, the does not appear
           <MenuItem key={wallet.address}>
             <Text>{shortAddress(wallet.address)}</Text>
           </MenuItem>
@@ -80,7 +81,7 @@ const MenuExample = () => {
   );
 };
 
-const PopoverExample = () => {
+const PopoverExampleThatCausesTheIssueWithCoinbaseWhenRendered = () => {
   return (
     <Popover placement="top" trigger="hover">
       <PopoverTrigger>
@@ -88,21 +89,39 @@ const PopoverExample = () => {
           <Button isDisabled>Open Popover</Button>
         </Box>
       </PopoverTrigger>
-      <PopoverContent
-        w="230px"
-        maxH="60vh"
-        maxW="100vh"
-        overflowY="auto"
-        borderColor="g.neutral.metallic.mid"
-        bgColor="g.primary.oxford.500"
-        rounded="sm"
-      >
+
+      {/* If the PopoverContent is replaced with NoAnimationPopoverContent, the does not appear */}
+      <PopoverContent>
         <PopoverArrow bg="gray.800" />
         <PopoverBody>
           <Text textAlign="center">Popover content</Text>
         </PopoverBody>
       </PopoverContent>
     </Popover>
+  );
+};
+
+const NoAnimationPopoverContent = ({children}: {children: React.ReactNode}) => {
+  const {isOpen} = usePopoverContext();
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <Box
+      position="absolute"
+      top={100}
+      left={0}
+      right={0}
+      bottom={0}
+      p={8}
+      border="1px solid red"
+      zIndex={1000}
+      bg="purple"
+    >
+      {children}
+    </Box>
   );
 };
 
